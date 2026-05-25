@@ -516,6 +516,69 @@ raicom-bobac3-simulation/
 
 ---
 
+## 常见问题
+
+### Python 脚本节点找不到
+
+```
+ERROR: cannot locate node of type [face_rec_service.py] in package [face_rec]
+```
+
+**原因：** Git 在 Windows 和 Linux 之间同步时可能丢失可执行权限。
+
+**解决：**
+```bash
+# 1. 添加可执行权限
+chmod +x ~/raicom-bobac3-simulation/src/face_rec/scripts/*.py
+
+# 2. 重新编译
+cd ~/raicom-bobac3-simulation
+catkin_make
+source devel/setup.bash
+```
+
+### SDF 模型版本不兼容
+
+```
+Error [Converter.cc:151] Unable to convert from SDF version 1.7 to 1.6
+```
+
+**原因：** Gazebo 9（ROS Melodic）不支持 SDF 1.7 格式。
+
+**解决：** 仓库已修复为 1.6 版本。如果手动添加了新模型，确保 `model.sdf` 和 `model.config` 中的版本号为 `1.6`。
+
+### Gazebo 模型加载失败
+
+```
+Error [SDF.cc:830]: Missing model database at [http://models.gazebosim.org]
+```
+
+**原因：** 未安装本地模型文件，Gazebo 尝试在线下载失败。
+
+**解决：**
+```bash
+mkdir -p ~/.gazebo/models
+cp -r ~/raicom-bobac3-simulation/src/reinovo_raicom_map ~/.gazebo/models/
+cp -r ~/raicom-bobac3-simulation/src/small_marker_charge_pile ~/.gazebo/models/
+cp -r ~/raicom-bobac3-simulation/src/obs_block ~/.gazebo/models/
+cp -r ~/raicom-bobac3-simulation/src/bobac3_description/world/* ~/.gazebo/models/
+```
+
+### 实机启动报错：Resource not found
+
+```
+Resource not found: rei_robot_base
+```
+
+**原因：** 实机启动文件依赖睿诺原厂包 `rei_robot_base` 和 `rei_ydlidar_nodelet`。
+
+**解决：** 从睿诺官方获取原厂包并安装到工作空间，或使用仿真启动文件：
+```bash
+roslaunch bobac3_navigation demo_nav_2d.launch
+```
+
+---
+
 ## 贡献指南
 
 1. Fork 本仓库并创建功能分支
