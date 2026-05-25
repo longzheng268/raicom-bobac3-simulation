@@ -205,22 +205,33 @@ git clone https://gitee.com/reinovo/bobac3_description.git
 ## 编译与安装
 
 ```bash
-# 1. 创建工作空间（如未创建）
-mkdir -p ~/catkin_ws/src
-cd ~/catkin_ws/src
+# 1. 克隆本仓库
+cd ~
+git clone https://github.com/longzheng268/raicom-bobac3-simulation.git
 
-# 2. 克隆本仓库
-git clone <repository-url> raicom-bobac3-simulation
-mv raicom-bobac3-simulation/src/* .
+# 2. 编译
+cd ~/raicom-bobac3-simulation
+catkin_make -j$(nproc)
 
-# 3. 安装外部依赖（参见上方"外部功能包"）
-
-# 4. 编译
-cd ~/catkin_ws
-catkin_make
-
-# 5. 加载环境
+# 3. 加载环境
 source devel/setup.bash
+```
+
+### 安装 Gazebo 仿真模型
+
+仿真功能需要将场地模型放到 `~/.gazebo/models/`，否则 Gazebo 会加载失败。
+
+```bash
+# 创建模型目录
+mkdir -p ~/.gazebo/models
+
+# 从仓库复制场地模型
+cp -r ~/raicom-bobac3-simulation/src/reinovo_raicom_map ~/.gazebo/models/
+cp -r ~/raicom-bobac3-simulation/src/small_marker_charge_pile ~/.gazebo/models/
+cp -r ~/raicom-bobac3-simulation/src/obs_block ~/.gazebo/models/
+
+# 复制展位模型
+cp -r ~/raicom-bobac3-simulation/src/bobac3_description/world/* ~/.gazebo/models/
 ```
 
 ---
