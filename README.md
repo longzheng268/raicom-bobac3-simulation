@@ -240,7 +240,64 @@ cp -r ~/raicom-bobac3-simulation/src/bobac3_description/world/* ~/.gazebo/models
 
 > **重要提示：** 以下每一步都需要在**新开的终端**中执行，且每个终端都要先运行 `source devel/setup.bash`。
 
-### 第一步：记录展位坐标
+---
+
+### A. 仿真环境（推荐新手先试）
+
+#### 1. 安装 Gazebo 仿真模型
+
+首次使用需将场地模型放到 Gazebo 模型目录：
+
+```bash
+mkdir -p ~/.gazebo/models
+cp -r ~/raicom-bobac3-simulation/src/reinovo_raicom_map ~/.gazebo/models/
+cp -r ~/raicom-bobac3-simulation/src/small_marker_charge_pile ~/.gazebo/models/
+cp -r ~/raicom-bobac3-simulation/src/obs_block ~/.gazebo/models/
+cp -r ~/raicom-bobac3-simulation/src/bobac3_description/world/* ~/.gazebo/models/
+```
+
+#### 2. 启动仿真导航
+
+**终端 1 — 启动仿真（Gazebo + RViz + 导航）：**
+```bash
+roslaunch bobac3_navigation demo_nav_2d.launch
+```
+
+启动后 Gazebo 会显示仿真场地和机器人模型，RViz 会显示地图和导航界面。
+
+> 可选地图：`demo`、`demo1`、`map`、`0123`、`aa`、`test`、`test1`、`reicom`、`rtab_map`。修改方法：
+> ```bash
+> roslaunch bobac3_navigation demo_nav_2d.launch map_file_name:=demo
+> ```
+
+#### 3. 在 RViz 中导航
+
+- 点击工具栏的 **"2D Nav Goal"** 按钮
+- 在地图上点击目标位置并拖动设定朝向
+- 机器人会在 Gazebo 中自动规划路径并移动
+
+#### 4. 仿真中记录展位坐标（可选）
+
+**终端 2 — 读取机器人当前坐标：**
+```bash
+rosrun tf tf_echo /map base_footprint
+```
+
+输出会不断刷新：
+```
+Translation: [-5.823, 8.637, 0.000]
+```
+
+将坐标记录到 `src/robot_audio/AIUI/dist/position_info.txt`：
+```
+展位名称 x坐标 y坐标 朝向 描述文字
+```
+
+---
+
+### B. 实机操作
+
+#### 第一步：记录展位坐标
 
 把机器人推到（或遥控到）各个展位位置，记录坐标用于语音导航。
 
@@ -249,28 +306,16 @@ cp -r ~/raicom-bobac3-simulation/src/bobac3_description/world/* ~/.gazebo/models
 roslaunch bobac3_navigation bobac3_nav_2d.launch
 ```
 
+> 实机启动依赖睿诺原厂包 `rei_robot_base` 和 `rei_ydlidar_nodelet`，需提前安装。
+
 **终端 2 — 移动机器人到目标展位，读取当前坐标：**
 ```bash
 rosrun tf tf_echo /map base_footprint
 ```
 
-输出会不断刷新类似这样的内容：
-```
-Translation: [-5.823, 8.637, 0.000]
-```
+记录坐标的格式同仿真部分。
 
-记下每个展位的 `(x, y)` 坐标，编辑 `src/robot_audio/AIUI/dist/position_info.txt`，按以下格式填入：
-
-```
-展位名称 x坐标 y坐标 朝向 描述文字
-```
-
-例如：
-```
-门口 -5.823 8.637 0 1 这里是门口，进入公司的地方
-```
-
-### 第二步：语音导航（日常使用）
+#### 第二步：语音导航（日常使用）
 
 坐标记录完成后，日常使用只需两个终端：
 
@@ -288,7 +333,7 @@ roslaunch bobac3_audio nav.launch
 - "带我去深圳厅" —— 导航到指定展位
 - "带我转一转" —— 自动导览模式，依次访问所有展位
 
-### 第三步：人脸识别（可选）
+#### 第三步：人脸识别（可选）
 
 **终端 1 — 启动人脸识别服务：**
 ```bash
@@ -302,12 +347,9 @@ roslaunch face_rec_ex nav.launch
 
 添加新人脸：在 `src/face_rec/face_data/` 下新建以人名命名的文件夹，放入至少一张清晰正面照即可。
 
-### 其他功能
+### C. 其他功能
 
 ```bash
-# 仿真环境导航
-roslaunch bobac3_navigation demo_nav_2d.launch
-
 # AR 标记追踪（底座相机）
 roslaunch ar_pose ar_base.launch
 
