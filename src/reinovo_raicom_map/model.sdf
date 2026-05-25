@@ -1,5 +1,5 @@
 <?xml version='1.0'?>
-<sdf version='1.7'>
+<sdf version='1.6'>
   <model name='reinovo_raicom_map'>
     <model name='rei_begin'>
       <link name='link_0'>

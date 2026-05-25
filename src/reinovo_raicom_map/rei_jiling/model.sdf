@@ -1,5 +1,5 @@
 <?xml version='1.0'?>
-<sdf version='1.7'>
+<sdf version='1.6'>
   <model name='rei_jiling'>
     <link name='link_0'>
       <visual name='visual'>
