@@ -265,6 +265,8 @@ roslaunch bobac3_navigation demo_nav_2d.launch
 
 启动后 Gazebo 会显示仿真场地和机器人模型，RViz 会显示地图和导航界面。
 
+![Gazebo 仿真](docs/img/display_gazebo.png)
+
 > 可选地图：`demo`、`demo1`、`map`、`0123`、`aa`、`test`、`test1`、`reicom`、`rtab_map`。修改方法：
 > ```bash
 > roslaunch bobac3_navigation demo_nav_2d.launch map_file_name:=demo
@@ -275,6 +277,8 @@ roslaunch bobac3_navigation demo_nav_2d.launch
 - 点击工具栏的 **"2D Nav Goal"** 按钮
 - 在地图上点击目标位置并拖动设定朝向
 - 机器人会在 Gazebo 中自动规划路径并移动
+
+![RViz 导航](docs/img/display_rviz.png)
 
 #### 4. 仿真中记录展位坐标（可选）
 
