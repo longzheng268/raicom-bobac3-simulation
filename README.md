@@ -293,6 +293,35 @@ Translation: [-5.823, 8.637, 0.000]
 展位名称 x坐标 y坐标 朝向 描述文字
 ```
 
+#### 5. 仿真语音交互（可选）
+
+坐标记录完成后，保持终端 1 仿真运行，另开终端：
+
+**终端 2 — 启动语音交互：**
+```bash
+roslaunch bobac3_audio nav.launch
+```
+
+唤醒词为**"元宝"**，唤醒后可以说：
+- "带我去深圳厅" —— 导航到指定展位
+- "带我转一转" —— 自动导览模式，依次访问所有展位
+
+> 注意：语音功能依赖科大讯飞 AIUI SDK，需提前配置 `src/robot_audio/AIUI/` 目录下的 SDK 文件和 AppID。
+
+#### 6. 仿真人脸识别（可选）
+
+**终端 1 — 启动人脸识别服务：**
+```bash
+roslaunch face_rec face_rec_service.launch
+```
+
+**终端 2 — 启动识别 + 语音播报：**
+```bash
+roslaunch face_rec_ex nav.launch
+```
+
+添加新人脸：在 `src/face_rec/face_data/` 下新建以人名命名的文件夹，放入至少一张清晰正面照即可。
+
 ---
 
 ### B. 实机操作
