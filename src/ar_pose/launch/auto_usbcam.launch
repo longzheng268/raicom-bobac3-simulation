@@ -1,0 +1,7 @@
+<launch>
+  <!-- Auto-detecting camera launch file -->
+  <arg name="camera_name" default="base_camera" />
+  
+  <node name="base_camera" pkg="ar_pose" type="auto_cam_node.py" output="screen">
+  </node>
+</launch>
