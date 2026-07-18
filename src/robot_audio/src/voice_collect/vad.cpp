@@ -6,7 +6,7 @@ VadAlgorithm::VadAlgorithm(size_t rate, uint8_t channels, uint8_t sample_length)
 
 size_t VadAlgorithm::get_nframes(uint8_t n_ms)
 {
-    return n_ms/1000.0 * m_rate * m_channels;
+    return static_cast<size_t>(n_ms) * m_rate * m_channels / 1000;
 }
 
 

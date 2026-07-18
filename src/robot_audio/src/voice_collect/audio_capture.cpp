@@ -67,6 +67,7 @@ bool AudioCap::start()
 {
     m_capture_flag = true;
     m_capture_thread = boost::thread(boost::bind(&AudioCap::capture, this));
+    return true;
 }
 bool AudioCap::is_capture()
 {

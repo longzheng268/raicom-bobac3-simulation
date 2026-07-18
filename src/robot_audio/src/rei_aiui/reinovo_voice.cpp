@@ -408,6 +408,7 @@ bool MyTalker::writeAudioFromLocal(string audiopath, Json::Value* semanteme)
         }
         return 0;
     }
+    return false;
 }
 
 void MyTalker::stopAudio()
@@ -443,6 +444,7 @@ bool MyTalker::writeText(string text,Json::Value* semanteme)
         }
         return 0;
     }
+    return false;
 }
 
 int MyTalker::testTTs(std::string audiopath,std::string ttstext)
