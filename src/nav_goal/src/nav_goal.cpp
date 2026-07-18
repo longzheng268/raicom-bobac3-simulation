@@ -1,29 +1,30 @@
-#include "ros/ros.h"//包含ROS头文件  
-#include <move_base_msgs/MoveBaseAction.h>//包含move_base action头文件  
-#include <actionlib/client/simple_action_client.h>//包含simple_aciton客户端头文件  
-main(int argc,char** argv)
+#include "ros/ros.h"
+#include <move_base_msgs/MoveBaseAction.h>
+#include <actionlib/client/simple_action_client.h>
+int main(int argc,char** argv)
 {
-  ros::init(argc,argv,"nav_goal");//ros初始化
-  ros::NodeHandle nh;//定义句柄
-  actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> ac("move_base",true);//定义一个acition客户端 ，用于发送机器人要到达的目标
-  ac.waitForServer();//等待服务开启
-  move_base_msgs::MoveBaseGoal goal;//定义一个存储目标的变量
+  ros::init(argc,argv,"nav_goal");
+  ros::NodeHandle nh;
+  actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> ac("move_base",true);
+  ac.waitForServer();
+  move_base_msgs::MoveBaseGoal goal;
   goal.target_pose.header.frame_id = "map";
   goal.target_pose.header.stamp = ros::Time::now();
-  goal.target_pose.pose.position.x = 2.534;//2.505;//目标点x 
-  goal.target_pose.pose.position.y = 0.111;// 0.099;//目标点y  
-  goal.target_pose.pose.orientation.z = -0.018;//0.008;
-  goal.target_pose.pose.orientation.w = 0.997;//1.000;//目标点姿态四元数表示
-  ac.sendGoal(goal);//发送目标
-  while(!(ac.getState()==actionlib::SimpleClientGoalState::SUCCEEDED))
-    {
-      usleep(1000*20);
-    }//等待机器人执行完成
+  // 从参数服务器读取目标坐标，默认值为演示值
+  nh.param<double>("target_x", goal.target_pose.pose.position.x, 2.534);
+  nh.param<double>("target_y", goal.target_pose.pose.position.y, 0.111);
+  nh.param<double>("target_oz", goal.target_pose.pose.orientation.z, -0.018);
+  nh.param<double>("target_ow", goal.target_pose.pose.orientation.w, 0.997);
+  ac.sendGoal(goal);
+  // 带超时的等待，避免永久阻塞
+  if (!ac.waitForResult(ros::Duration(60.0))) {
+    ROS_WARN("Navigation timed out");
+    ac.cancelGoal();
+    return 1;
+  }
+  if (ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
     ROS_INFO("机器人到达目标点");
-    return 0;
+  else
+    ROS_WARN("Navigation failed: %s", ac.getState().toString().c_str());
+  return 0;
 }
-//[2.562, 0.175,-0.011, 1.000]
-//[2.535, 0.117,-0.006, 1.000]
-//[2.506, 0.142,-0.000,1.000]  [2.516,0.142,-0.000,1.000]
-
-//上海新点：[1.055, 2.109，0.011, 1.000]

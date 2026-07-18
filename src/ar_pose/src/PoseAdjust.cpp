@@ -164,7 +164,7 @@ int8_t ArPoseAdjust::FindTarget(){
     ROS_ERROR("RelativeMove error");
     return -2;
   }
-  sleep(1);
+  ros::Duration(1.0).sleep();
   if (GetMarkerPose() == 0) {
     ROS_DEBUG("Find");
     return 0;
@@ -173,7 +173,7 @@ int8_t ArPoseAdjust::FindTarget(){
     ROS_ERROR("RelativeMove error");
     return -2;
   }
-  sleep(1);
+  ros::Duration(1.0).sleep();
   if (GetMarkerPose() == 0) {
     ROS_DEBUG("Find");
     return 0;

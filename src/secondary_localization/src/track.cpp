@@ -11,8 +11,8 @@ int main(int argc,char** argv)
     relative_move::SetRelativeMove RelativeMove_data;
     ar_pose::Track Track_data;
 
-    ros::service::waitForService("relative_move");//等待服务启动
-    ros::service::waitForService("track");//等待服务启动
+    ros::service::waitForService("relative_move", ros::Duration(10.0));//等待服务启动（带超时）
+    ros::service::waitForService("track", ros::Duration(10.0));//等待服务启动（带超时）
 
     Track_data.request.ar_id = 0;  //跟踪0号ar码
     Track_data.request.goal_dist = 0.3;
