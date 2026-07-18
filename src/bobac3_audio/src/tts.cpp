@@ -18,6 +18,6 @@ int main(int argc, char * argv[])
     robot_audio::robot_tts tts_srv;
     tts_srv.request.text = "卑鄙者的通行证 高尚者的墓志铭";
     tts_client.call(tts_srv);
-    safe_play(tts_srv.response.audiopath)
+    safe_play(tts_srv.response.audiopath);
     return 0;
 }

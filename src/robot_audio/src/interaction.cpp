@@ -6,6 +6,14 @@
 #include <robot_audio/robot_tts.h>
 #include <robot_audio/robot_semanteme.h>
 #include <robot_audio/Nav.h>
+
+// Safe audio playback without shell injection
+static void safe_play(const std::string& path) {
+    if (path.empty()) return;
+    std::string cmd = "aplay " + path + " &> /dev/null";
+    FILE* p = popen(cmd.c_str(), "r");
+    if (p) pclose(p);
+}
 ros::ServiceClient collect_client;
 ros::ServiceClient awake_client;
 ros::ServiceClient control_client;
@@ -39,7 +47,7 @@ int main(int argc, char** argv){
                     if(awake_client.call(awake_srv)){
 					if(awake_srv.response.awake_flag){
                             wakeup_flag = true;
-                            system("aplay  ./AIUI/audio/awake.wav");
+                            safe_play("./AIUI/audio/awake.wav");
                             sleep(1);
                         }
                         else std::cout<< " 休眠中，请用唤醒词唤醒。" << std::endl;
@@ -57,7 +65,10 @@ int main(int argc, char** argv){
                 std::cout<<"回答---"<<aiui_srv.response.anwser<<std::endl;
                 if(aiui_srv.response.intent == "robot_nav"){
                     robot_audio::Nav nav_srv;
-                    nav_srv.request.nav_order = aiui_srv.response.slots_value[1];
+                    if(aiui_srv.response.slots_value.size() > 1)
+                        nav_srv.request.nav_order = aiui_srv.response.slots_value[1];
+                    else
+                        nav_srv.request.nav_order = aiui_srv.response.anwser;
                     nav_client.call(nav_srv);
                 }else if(aiui_srv.response.intent == "robot_guid"){
                     robot_audio::Nav nav_srv;
@@ -65,20 +76,26 @@ int main(int argc, char** argv){
                     nav_client.call(nav_srv);
                 }else if(aiui_srv.response.intent == "robot_control"){
                     robot_audio::Control ctrl_srv;
-                    ctrl_srv.request.controlInfo.push_back(aiui_srv.response.slots_value[0]);
+                    if(aiui_srv.response.slots_value.size() > 0)
+                        ctrl_srv.request.controlInfo.push_back(aiui_srv.response.slots_value[0]);
                     ctrl_srv.request.controlInfo.push_back(aiui_srv.response.anwser);
                     float dist;
 
-                    if(aiui_srv.response.slots_value[2] == "厘米"){
-                        dist = atof(aiui_srv.response.slots_value[1].c_str())/100.0;
-                        ctrl_srv.request.value = dist;
-                    }else if(aiui_srv.response.slots_value[2] == "毫米"){
-                        dist = atof(aiui_srv.response.slots_value[1].c_str())/1000.0;
-                        ctrl_srv.request.value = dist;
-                    }else if(aiui_srv.response.slots_value[2] == "度"){
-                        dist = atof(aiui_srv.response.slots_value[1].c_str()) * 3.1415/180.0;
-                        ctrl_srv.request.value = dist;
-                    }else ctrl_srv.request.value = atof(aiui_srv.response.slots_value[1].c_str());
+                    if(aiui_srv.response.slots_value.size() > 2){
+                        const std::string& unit = aiui_srv.response.slots_value[2];
+                        if(unit == "厘米"){
+                            dist = atof(aiui_srv.response.slots_value[1].c_str())/100.0;
+                            ctrl_srv.request.value = dist;
+                        }else if(unit == "毫米"){
+                            dist = atof(aiui_srv.response.slots_value[1].c_str())/1000.0;
+                            ctrl_srv.request.value = dist;
+                        }else if(unit == "度"){
+                            dist = atof(aiui_srv.response.slots_value[1].c_str()) * 3.1415/180.0;
+                            ctrl_srv.request.value = dist;
+                        }else ctrl_srv.request.value = atof(aiui_srv.response.slots_value[1].c_str());
+                    }else{
+                        ctrl_srv.request.value = 0;
+                    }
                     control_client.call(ctrl_srv);
                 }else{
                     robot_audio::robot_tts tts_srv;

@@ -21,5 +21,5 @@ int main(int argc,char** argv)
     ros::service::waitForService("voice_collect"); //等待服务开启
     collect_client.call(srv); //发送消息
     ROS_INFO("File saved in : %s",srv.response.voice_filename.c_str());
-    safe_play(srv.response.voice_filename)
+    safe_play(srv.response.voice_filename);
 }
