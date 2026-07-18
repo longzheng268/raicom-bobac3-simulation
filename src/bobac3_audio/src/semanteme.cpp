@@ -28,14 +28,20 @@ int main(int argc, char** argv)
         //导航意图
         if(srv.response.intent == "robot_nav"){
             //打印消息
-            std::cout<<srv.response.slots_name[0]<<":"<<srv.response.slots_value[0]
-            <<"\n"<<srv.response.slots_name[1]<<":"<<srv.response.slots_value[1]<<std::endl;
+            if(srv.response.slots_name.size()>=2 && srv.response.slots_value.size()>=2)
+                std::cout<<srv.response.slots_name[0]<<":"<<srv.response.slots_value[0]
+                <<"\n"<<srv.response.slots_name[1]<<":"<<srv.response.slots_value[1]<<std::endl;
+            else
+                std::cout<<"slots size error"<<std::endl;
         //控制意图
         }else if(srv.response.intent == "robot_control"){
             //打印消息
-            std::cout<<srv.response.slots_name[0]<<":"<<srv.response.slots_value[0]
-            <<"\n"<<srv.response.slots_name[1]<<":"<<srv.response.slots_value[1]
-            <<"\n"<<srv.response.slots_name[2]<<":"<<srv.response.slots_value[2]<<std::endl;
+            if(srv.response.slots_name.size()>=3 && srv.response.slots_value.size()>=3)
+                std::cout<<srv.response.slots_name[0]<<":"<<srv.response.slots_value[0]
+                <<"\n"<<srv.response.slots_name[1]<<":"<<srv.response.slots_value[1]
+                <<"\n"<<srv.response.slots_name[2]<<":"<<srv.response.slots_value[2]<<std::endl;
+            else
+                std::cout<<"slots size error"<<std::endl;
         }
         std::cout<<"回答："<< srv.response.anwser<<std::endl;
     }

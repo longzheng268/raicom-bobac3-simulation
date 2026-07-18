@@ -25,23 +25,25 @@ class Face_Rec():
         self.face_load()
         self.pub_data = rospy.Publisher("/face_results", face_results, queue_size=10) # 发布人脸数据
         self.pub_img = rospy.Publisher("/camera/face_recognition", Image, queue_size=10) # 设置发布话题名、类型、设置队列个数       
+        self.bridgr = CvBridge() # 创建CvBridge对象（只创建一次）
         self.sub_img = rospy.Subscriber("/head_cam/image_raw",Image,self.image_callback) # 订阅摄像头节点
         rospy.spin()
         
     def image_callback(self, image):
         
-        bridgr = CvBridge()
         # 将消息转为bgr格式
-        frame = bridgr.imgmsg_to_cv2(image,'bgr8')
+        frame = self.bridgr.imgmsg_to_cv2(image,'bgr8')
         face_locations = [] # 检测到的未知人脸列表
         face_encodings = [] # 未知人脸编码列表
         face_names = [] # 实时标签列表列表
-        process_this_frame = True 
+        if not hasattr(self, '_frame_counter'):
+            self._frame_counter = 0
+        self._frame_counter += 1
         # 将视频帧大小调整为1/4大小，以加快人脸识别处理速度
         small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
         # 将图像从 BGR 颜色（OpenCV 使用）转换为 RGB 颜色（face_recognition使用）
         rgb_small_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
-        if process_this_frame == True: # 间隔
+        if self._frame_counter % 2 == 0: # 间隔两帧处理一次
             # 查找当前视频帧中的所有人脸
             face_locations = face_recognition.face_locations(rgb_small_frame)       
             # 把查找到人脸进行编码
@@ -53,6 +55,9 @@ class Face_Rec():
                 name = "Unknown"
                 # 计算检测到的人脸和已知人脸的误差
                 face_distances = face_recognition.face_distance(self.known_face_encodings,face_encoding)
+                if len(face_distances) == 0:
+                    face_names.append("Unknown")
+                    continue
                 matches = face_recognition.compare_faces(self.known_face_encodings, face_encoding,self.tolerance)
                 # 得到误差最小的人脸在已知列表中的位置
                 best_match_index = np.argmin(face_distances)
@@ -88,7 +93,7 @@ class Face_Rec():
             data.ymax = bottom
             results.face_data.append(data)
 
-        img = bridgr.cv2_to_imgmsg(frame,"bgr8") # 把OpenCV图像转换为ROS消息
+        img = self.bridgr.cv2_to_imgmsg(frame,"bgr8") # 把OpenCV图像转换为ROS消息
         self.pub_data.publish(results)
         self.pub_img.publish(img) # 发布图像到话题
 
@@ -100,7 +105,10 @@ class Face_Rec():
             file = os.path.join(self.face_data,name)
             for img in os.listdir(file):
                 new_image = face_recognition.load_image_file(os.path.join(file,img)) # 将图片转换为numpy数组
-                new_face_encoding = face_recognition.face_encodings(new_image)[0] # 得到人脸编码
+                new_face_encodings = face_recognition.face_encodings(new_image)
+                if len(new_face_encodings) == 0:
+                    continue # 跳过无人脸的图片
+                new_face_encoding = new_face_encodings[0] # 得到人脸编码
                 self.known_face_encodings.append(new_face_encoding) # 添加到已知人脸库
                 self.known_face_names.append(name) # 添加人脸名称
 

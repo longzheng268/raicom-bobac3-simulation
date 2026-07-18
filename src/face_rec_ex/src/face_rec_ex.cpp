@@ -7,6 +7,14 @@
 #include "move_base_msgs/MoveBaseAction.h"
 #include <iostream>
 #include <string>
+
+// Safe audio playback without shell injection
+static void safe_play(const std::string& path) {
+    if (path.empty()) return;
+    std::string cmd = "aplay " + path + " &> /dev/null";
+    FILE* p = popen(cmd.c_str(), "r");
+    if (p) pclose(p);
+}
 using namespace std;
 
 class interaction{
@@ -43,8 +51,7 @@ string interaction::voice_tts(const char* text){
     robot_audio::robot_tts srv;
     srv.request.text = text;
     tts_client.call(srv);
-    string cmd= "play "+srv.response.audiopath;
-    system(cmd.c_str());
+    safe_play(srv.response.audiopath);
     sleep(1);
     return srv.response.audiopath;
 }

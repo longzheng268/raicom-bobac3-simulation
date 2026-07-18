@@ -51,12 +51,15 @@ class Face_Rec():
         face_encodings = [] # 未知人脸编码列表
         face_names = [] # 实时标签列表列表
         process_this_frame = True 
+        if not hasattr(self, '_frame_counter'):
+            self._frame_counter = 0
+        self._frame_counter += 1
         results = face_results()
         # 将视频帧大小调整为1/4大小，以加快人脸识别处理速度
         small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
         # 将图像从 BGR 颜色（OpenCV 使用）转换为 RGB 颜色（face_recognition使用）
         rgb_small_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
-        if process_this_frame == True: # 间隔
+        if self._frame_counter % 2 == 0: # 间隔两帧处理一次
             # 查找当前视频帧中的所有人脸
             face_locations = face_recognition.face_locations(rgb_small_frame)       
             # 把查找到人脸进行编码
@@ -68,7 +71,9 @@ class Face_Rec():
                 name = "Unknown"
                 # 计算检测到的人脸和已知人脸的误差
                 face_distances = face_recognition.face_distance(self.known_face_encodings,face_encoding)
-                matches = face_recognition.compare_faces(self.known_face_encodings, face_encoding)
+                if len(face_distances) == 0:
+                    face_names.append("Unknown")
+                    continue
                 # 得到误差最小的人脸在已知列表中的位置
                 best_match_index = np.argmin(face_distances)
                 matches = face_recognition.compare_faces(self.known_face_encodings, face_encoding,self.tolerance)
@@ -102,7 +107,10 @@ class Face_Rec():
             file = os.path.join(self.face_data,name)
             for img in os.listdir(file):
                 new_image = face_recognition.load_image_file(os.path.join(file,img)) # 将图片转换为numpy数组
-                new_face_encoding = face_recognition.face_encodings(new_image)[0] # 得到人脸编码
+                new_face_encodings = face_recognition.face_encodings(new_image)
+                if len(new_face_encodings) == 0:
+                    continue # 跳过无人脸的图片
+                new_face_encoding = new_face_encodings[0] # 得到人脸编码
                 self.known_face_encodings.append(new_face_encoding) # 添加到已知人脸库
                 self.known_face_names.append(name) # 添加人脸名称
 

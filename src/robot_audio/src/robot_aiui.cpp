@@ -73,7 +73,10 @@ bool audio_semanteme_cb(robot_audio::robot_semanteme::Request &req,robot_audio::
     }
     if(res.intent == "robot_nav")
     {
-      res.anwser = "好的！现在就带你去"+res.slots_value[1];
+      if(res.slots_value.size()>=2)
+        res.anwser = "好的！现在就带你去"+res.slots_value[1];
+      else
+        res.anwser = "好的！现在就带你去";
     }
     return 1;
   }

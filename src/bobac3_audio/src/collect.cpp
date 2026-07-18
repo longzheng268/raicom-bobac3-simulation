@@ -3,6 +3,14 @@
 #include <iostream>
 #include <string>
 
+// Safe audio playback without shell injection
+static void safe_play(const std::string& path) {
+    if (path.empty()) return;
+    std::string cmd = "aplay " + path + " &> /dev/null";
+    FILE* p = popen(cmd.c_str(), "r");
+    if (p) pclose(p);
+}
+
 int main(int argc,char** argv)
 {
     ros::init(argc,argv,"collect"); //初始化节点
@@ -13,7 +21,5 @@ int main(int argc,char** argv)
     ros::service::waitForService("voice_collect"); //等待服务开启
     collect_client.call(srv); //发送消息
     ROS_INFO("File saved in : %s",srv.response.voice_filename.c_str());
-    std::string dir = "play "+srv.response.voice_filename; //编辑为系统指令
-    sleep(1);
-    system(dir.c_str()); //播放音频文件
+    safe_play(srv.response.voice_filename)
 }

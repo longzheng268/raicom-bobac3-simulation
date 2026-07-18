@@ -5,10 +5,19 @@
 #include <actionlib/client/simple_action_client.h>
 #include "move_base_msgs/MoveBaseAction.h"
 #include <iostream>
+#include <memory>
 #include <string>
 
 #include <relative_move/SetRelativeMove.h>
 #include <ar_pose/Track.h>
+
+// Safe audio playback without shell injection
+static void safe_play(const std::string& path) {
+    if (path.empty()) return;
+    std::string cmd = "aplay " + path + " &> /dev/null";
+    FILE* p = popen(cmd.c_str(), "r");
+    if (p) pclose(p);
+}
 using namespace std;
 struct Point   //定义一个名为Student的结构体
 {
@@ -33,7 +42,7 @@ class interaction{
         void goto_nav(struct Point* point); //导航到目标位置
     private:
         ros::NodeHandle n; //创建一个节点句柄
-        actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction>* ac; //创建action客户端对象指针
+        std::unique_ptr<actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction>> ac; //智能指针自动释放
         ros::ServiceClient collect_client,dictation_client,tts_client; //创建客户端
 };
 interaction::interaction(){
@@ -63,14 +72,13 @@ string interaction::voice_tts(const char* text){
     robot_audio::robot_tts srv;
     srv.request.text = text;
     tts_client.call(srv);
-    string cmd= "play "+srv.response.audiopath;
-    system(cmd.c_str());
+    safe_play(srv.response.audiopath);
     sleep(1);
     return srv.response.audiopath;
 }
 
 void interaction::goto_nav(struct Point* point){ //导航到目标
-    ac = new AC("move_base",true);
+    ac = std::make_unique<AC>("move_base",true);
     ROS_INFO("Waiting for action server to start.");
     ac->waitForServer();//一直等待move_base Action服务开启
     ROS_INFO("Action server started, sending goal.");
@@ -89,7 +97,6 @@ void interaction::goto_nav(struct Point* point){ //导航到目标
     if(ac->getState() == actionlib::SimpleClientGoalState::SUCCEEDED) //判断导航状态
        ROS_INFO("Goal succeeded!");
      ac->cancelGoal(); //取消动作
-     delete ac;
 }
 
 int ad(void)
