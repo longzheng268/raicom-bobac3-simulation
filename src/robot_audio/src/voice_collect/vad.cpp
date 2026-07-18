@@ -30,7 +30,7 @@ short VadAlgorithm::sgn(int sample)
 size_t VadAlgorithm::get_nframes_cross_zero_rate(short* nframes_buffer, size_t n_frames)
 {
     int rate = 0;
-    for (int i = 0; i<n_frames; i++) {
+    for (int i = 0; i<n_frames - 1; i++) {
         if( sgn(*(nframes_buffer + i + 1)) - sgn( *(nframes_buffer + i)) ) {
             rate++;
         }
@@ -77,7 +77,7 @@ void VadAlgorithm::env_detect(boost::shared_ptr<char> buffer, size_t size, uint8
         Z_sum += Z[i] = get_nframes_cross_zero_rate(buf + i*nframes, nframes);
     }
     E_avg = E_sum / n_nframes;
-    Z_avg = Z_avg / n_nframes;
+    Z_avg = Z_sum / n_nframes;
     for(size_t i=0; i< n_nframes; i++) {
         E_std += (E[i] - E_avg) * (E[i] - E_avg);
         Z_std += (Z[i] - Z_avg) * (Z[i] - Z_avg);

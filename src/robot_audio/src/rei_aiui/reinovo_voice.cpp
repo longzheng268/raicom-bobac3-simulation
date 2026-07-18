@@ -450,6 +450,7 @@ int MyTalker::testTTs(std::string audiopath,std::string ttstext)
     if (NULL != agent)
     {
         tts_save_path = audiopath;
+        wav_hdr = default_wav_hdr;
         fp = fopen( tts_save_path.c_str(), "wb");
         if(NULL == fp)
         {

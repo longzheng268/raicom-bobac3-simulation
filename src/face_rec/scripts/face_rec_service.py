@@ -20,7 +20,7 @@ class Face_Rec():
         self.known_face_encodings = list()
         self.known_face_names = list()
         self.face_data = rospy.get_param('~face_data', '') # 人脸图片目录
-        self.tolerance = rospy.get_param('~tolerance', '')  # 人脸比对容差值
+        self.tolerance = rospy.get_param('~tolerance', 0.6)  # 人脸比对容差值
         self.face_load()
         self.face_recsrv = rospy.Service('face_recognition_results', recognition_results,self.detect_callback) 
         rospy.spin()
@@ -36,7 +36,7 @@ class Face_Rec():
         elif req.mode ==2:
             print(req.image_path)
             frame = cv2.imread(req.image_path,1)
-            if(frame.date==None):
+            if(frame is None):
                 return recognition_resultsResponse(results,False)
             else:  
                 return self.generate_srv(frame)

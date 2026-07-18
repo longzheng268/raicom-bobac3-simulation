@@ -94,6 +94,7 @@ bool ChargeCallback(auto_charging::SetCharge::Request &req, auto_charging::SetCh
             }
         }else res.success = false;
     }
+    return true;
 }
 
 

@@ -29,7 +29,7 @@ void VoiceNav::position_read()
         cout<<"open position info  file  erro"<<endl;
     }
     while(1){	
-        if(fscanf(fp, "%s", str) == EOF)
+        if(fscanf(fp, "%299s", str) == EOF)
             break;
         
         position_name.push_back(str);

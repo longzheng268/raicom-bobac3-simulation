@@ -20,7 +20,7 @@ class Face_Rec():
 
         self.known_face_encodings = list()
         self.known_face_names = list()
-        self.tolerance = rospy.get_param('~tolerance', '')  # 人脸比对容差值
+        self.tolerance = rospy.get_param('~tolerance', 0.6)  # 人脸比对容差值
         self.face_data = rospy.get_param('~face_data', '') # 人脸图片目录
         self.face_load()
         self.pub_data = rospy.Publisher("/face_results", face_results, queue_size=10) # 发布人脸数据
@@ -109,7 +109,7 @@ class Face_Rec():
         font = ImageFont.truetype('NotoSansCJK-Bold.ttc',30)
         fillColor = color #(255,0,0)
         position = pos #(100,100)
-        if not isinstance(chinese,unicode):
+        if isinstance(chinese, bytes):
             chinese = chinese.decode('utf-8')
         draw = ImageDraw.Draw(img_PIL)
         draw.text(position,chinese,font=font,fill=fillColor)
